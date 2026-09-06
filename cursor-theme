@@ -1,0 +1,40 @@
+#!/bin/env fish
+# Which Action
+read -p "echo 'Command (list - lists cursors, change - change cursor): '" command
+
+if test $command = "list"
+    set_color green
+    printf "\n%s\n" "[Cursors in ~/.icons]"
+    set_color normal
+    # Check every folder in .icons, Print folders that have a cursor theme (cursors folder)
+    for pack in ~/.icons/*
+        if test -e $pack/cursors
+            echo $pack
+        end
+    end
+    set_color yellow
+    printf "\n%s\n" "[Cursors in /usr/share/icons]"
+    set_color normal
+    # Check every folder in /usr/share/icons. Print folders with cursor theme.
+    for pack in /usr/share/icons/*
+        if test -e $pack/cursors
+            echo $pack 
+        end
+    end
+
+else if test $command = "change"
+    read -p "echo 'Enter cursor-theme path: '" cursor_path
+    # Check if the path is an actual cursor theme.
+    if test -e $cursor_path/cursors
+        # Set $cursor to the folder name of the theme
+        set cursor (basename $cursor_path)
+        # Set cursor to the cursor theme in gnome/cosmic settings
+        gsettings set org.gnome.desktop.interface cursor-theme $cursor
+        # Write $cursor as the default mouse cursor in default theme.
+        printf "%s\n" \
+        "[Icon Theme]" \
+        "Inherits=$cursor" > ~/.icons/default/index.theme
+    else
+        echo "Invalid Path. Might not be cursor theme."
+    end
+end
